@@ -32,7 +32,7 @@ Bambu Studio / OrcaSlicer
 
 ## Quickstart (use the live tool)
 
-1. Open the deployed app (or clone and run locally — see Build).
+1. Clone and run locally (see Build), or self-host the build artifact.
 2. Pick your printer and the Farmloop hardware stage you have installed.
 3. Drop one or more sliced `.gcode` files. Each one keeps its own loop count.
 4. Tune temps, sweep geometry, and loop counts if needed.
