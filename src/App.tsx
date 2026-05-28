@@ -45,7 +45,7 @@ export default function App() {
 
   const stepIdx = STEP_ORDER.indexOf(state.step);
   const canBack = stepIdx > 0;
-  const validJobs = state.jobs.filter((j) => !j.error);
+  const validJobs = state.jobs.filter((j) => !j.error && j.metrics != null);
   const canNext =
     (state.step === 'hardware') ||
     (state.step === 'files' && validJobs.length > 0) ||
