@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MoreHorizontal } from 'lucide-react';
+import { KeyboardHints } from '@/components/KeyboardHints';
 import type { Step } from '@/state';
 
 const STEPS: { id: Step; title: string }[] = [
@@ -58,6 +59,7 @@ export function WizardShell({ step, canBack, canNext, onBack, onNext, onJumpStep
             })}
           </ol>
           {advancedTrigger}
+          <KeyboardHints />
         </div>
       </header>
 
