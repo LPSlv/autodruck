@@ -1,0 +1,26 @@
+# Third-party bundle pulled for one-time architecture inspection.
+# Not redistributable; never commit.
+farmloop_chunk.js
+*.farmloop_chunk*
+418e6c9a*.js
+
+# Personal test files (delete these lines if you want to ship fixtures)
+test_sample.gcode.3mf
+sample_unpacked/
+
+# Build artifacts / OS junk
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Browser-side state (none yet, but keep the door closed)
+.cache/
+dist/
+build/
