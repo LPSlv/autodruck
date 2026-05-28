@@ -22,7 +22,6 @@ export default function App() {
     const p = loadPersisted();
     dispatch({ type: 'hydrate', partial: {
       printer: p.printer ?? state.printer,
-      stage: p.stage ?? state.stage,
       globalDefaults: p.globalDefaults ?? state.globalDefaults,
       customTemplates: p.customTemplates ?? state.customTemplates,
       cost: p.cost ?? state.cost
@@ -35,13 +34,12 @@ export default function App() {
     if (!hydrated) return;
     const t = setTimeout(() => savePersisted({
       printer: state.printer,
-      stage: state.stage,
       globalDefaults: state.globalDefaults,
       customTemplates: state.customTemplates,
       cost: state.cost
     }), 300);
     return () => clearTimeout(t);
-  }, [hydrated, state.printer, state.stage, state.globalDefaults, state.customTemplates, state.cost]);
+  }, [hydrated, state.printer, state.globalDefaults, state.customTemplates, state.cost]);
 
   const stepIdx = STEP_ORDER.indexOf(state.step);
   const canBack = stepIdx > 0;
@@ -60,7 +58,7 @@ export default function App() {
   function handleMerge() {
     try {
       const merged = buildMerged(validJobs, state);
-      const name = mergedFilename(state.printer, state.stage, validJobs.length, merged);
+      const name = mergedFilename(state.printer, validJobs.length, merged);
       downloadBlob(name, merged);
     } catch (e) {
       toast.error((e as Error).message);
@@ -90,9 +88,8 @@ export default function App() {
       >
         {state.step === 'hardware' && (
           <Step1Hardware
-            printer={state.printer} stage={state.stage}
+            printer={state.printer}
             onPrinter={(p) => dispatch({ type: 'setPrinter', printer: p })}
-            onStage={(s) => dispatch({ type: 'setStage', stage: s })}
           />
         )}
         {state.step === 'files' && (
@@ -104,7 +101,7 @@ export default function App() {
         )}
         {state.step === 'tune' && (
           <Step3Tune
-            printer={state.printer} stage={state.stage}
+            printer={state.printer}
             jobs={state.jobs} globalDefaults={state.globalDefaults}
             onJobRepeats={(id, n) => dispatch({ type: 'setJobRepeats', id, repeats: n })}
             onJobOverride={(id, patch) => dispatch({ type: 'setJobOverride', id, patch })}
@@ -119,7 +116,7 @@ export default function App() {
       <AdvancedSheet
         open={state.advancedOpen}
         onOpenChange={(v) => dispatch({ type: 'toggleAdvanced', open: v })}
-        printer={state.printer} stage={state.stage}
+        printer={state.printer}
         globalDefaults={state.globalDefaults}
         customTemplates={state.customTemplates}
         cost={state.cost}

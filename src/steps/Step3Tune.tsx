@@ -6,12 +6,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { presetLabel } from '@/lib/presets';
 import type { Job } from '@/state';
 import type { PrinterId, TuningParams } from '@/lib/gcode';
-import type { Stage } from '@/lib/presets';
 import { ChevronDown } from 'lucide-react';
 
 type Props = {
   printer: PrinterId;
-  stage: Stage;
   jobs: Job[];
   globalDefaults: TuningParams;
   onJobRepeats: (id: string, n: number) => void;
@@ -32,13 +30,13 @@ const OVERRIDE_FIELDS: OverrideField[] = [
   { key: 'parkz',          label: 'Park Z' },
 ];
 
-export function Step3Tune({ printer, stage, jobs, globalDefaults, onJobRepeats, onJobOverride, onOpenAdvanced }: Props) {
+export function Step3Tune({ printer, jobs, globalDefaults, onJobRepeats, onJobOverride, onOpenAdvanced }: Props) {
   return (
     <div className="space-y-6">
       <Card className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="font-medium">{presetLabel(printer, stage)}</div>
+            <div className="font-medium">{presetLabel(printer)}</div>
             <div className="text-sm text-muted-foreground mt-1">
               Cooldown {globalDefaults.cooldownTarget}°C · {globalDefaults.repeats} sweeps · {globalDefaults.zlift}mm zlift · dwell {globalDefaults.dwell}s
             </div>

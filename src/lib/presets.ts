@@ -1,9 +1,7 @@
-// Hardware presets + default tuning per (printer × stage). Templates are
+// Hardware presets + default tuning per printer. Templates are
 // generic Bambu motion commands meant as a starting point — paste your
 // hardware-specific gcode in the settings drawer.
 import type { PrinterId, TuningParams } from './gcode';
-
-export type Stage = 1 | 2;
 
 export type PrinterMeta = {
   id: PrinterId;
@@ -40,7 +38,7 @@ export const PRINTERS: PrinterMeta[] = [
   { id: 'h2c',    label: 'H2C',     modelIds: ['C18'], buildVolume: [350, 320, 325] }
 ];
 
-const a1_stage1_post = [
+const a1_post = [
   '; --- farm portal · stage 1 detachment ---',
   'M117 cooling for detach',
   'M104 S{nozzleTempIdle} ; nozzle to idle temp (low to prevent oozing)',
@@ -61,33 +59,7 @@ const a1_stage1_post = [
   'M117 ready'
 ].join('\n');
 
-const a1_stage1_pre = '; --- farm portal · pre-print marker ---\nM117 starting print';
-
-const a1_stage2_post = [
-  '; --- farm portal · stage 2 detachment ---',
-  'M117 cooling',
-  'M104 S{nozzleTempIdle}',
-  'M140 S{cooldownTarget}',
-  'M190 R{cooldownWaitAt}',
-  'G4 S{dwell}',
-  'M140 S0',
-  'G90',
-  'G1 Z{zlift} F600',
-  '; trigger actuator + cooling fan',
-  'M106 P3 S255',
-  'G4 S3',
-  '; sweep across to engage actuator',
-  '{repeat:repeats}',
-  'G1 X{pushx} F{pushspeed}',
-  'G1 X{returnx} F{returnspeed}',
-  '{endrepeat}',
-  'M106 P3 S0',
-  'G1 Y{parky} F3000',
-  'G1 Z{parkz} F600',
-  '{if:bedTempReheat}M140 S{bedTempReheat}{endif}',
-  'M84',
-  'M117 ready'
-].join('\n');
+const a1_pre = '; --- farm portal · pre-print marker ---\nM117 starting print';
 
 const TEMP_DEFAULTS = {
   cooldownTarget: 25,
@@ -97,61 +69,25 @@ const TEMP_DEFAULTS = {
   nozzleTempIdle: 140
 };
 
-export const PRESETS: Record<PrinterId, Record<Stage, Preset>> = {
-  a1: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, zlift: 8, repeats: 3, pushx: -18, returnx: 120, pushspeed: 6000, returnspeed: 12000, parky: 240, parkz: 100 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 15, zlift: 8, repeats: 2, pushx: -18, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 240, parkz: 100 } }
-  },
-  a1mini: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, zlift: 5, repeats: 3, pushx: -15, returnx: 90, pushspeed: 6000, returnspeed: 12000, parky: 170, parkz: 80 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 15, zlift: 5, repeats: 2, pushx: -15, returnx: 180, pushspeed: 9000, returnspeed: 18000, parky: 170, parkz: 80 } }
-  },
-  p1s: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  p1p: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  p2s: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  x1c: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  h2s: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  h2d: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  },
-  h2c: {
-    1: { pre: a1_stage1_pre, post: a1_stage1_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
-    2: { pre: a1_stage1_pre, post: a1_stage2_post,
-         defaults: { ...TEMP_DEFAULTS, dwell: 20, zlift: 10, repeats: 2, pushx: 0, returnx: 256, pushspeed: 9000, returnspeed: 18000, parky: 220, parkz: 120 } }
-  }
+export const PRESETS: Record<PrinterId, Preset> = {
+  a1:     { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, zlift: 8, repeats: 3, pushx: -18, returnx: 120, pushspeed: 6000, returnspeed: 12000, parky: 240, parkz: 100 } },
+  a1mini: { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, zlift: 5, repeats: 3, pushx: -15, returnx: 90, pushspeed: 6000, returnspeed: 12000, parky: 170, parkz: 80 } },
+  p1s:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  p1p:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  p2s:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  x1c:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  h2s:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  h2d:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } },
+  h2c:    { pre: a1_pre, post: a1_post,
+            defaults: { ...TEMP_DEFAULTS, dwell: 30, zlift: 10, repeats: 3, pushx: 0, returnx: 220, pushspeed: 6000, returnspeed: 12000, parky: 220, parkz: 120 } }
 };
 
 export const DEFAULT_COST: CostSettings = {
@@ -164,11 +100,11 @@ export const DEFAULT_COST: CostSettings = {
   failureRatePct: 3
 };
 
-export function presetFor(printer: PrinterId, stage: Stage): Preset {
-  return (PRESETS[printer] && PRESETS[printer][stage]) || PRESETS.a1[1];
+export function presetFor(printer: PrinterId): Preset {
+  return PRESETS[printer] || PRESETS.a1;
 }
 
-export function presetLabel(printer: PrinterId, stage: Stage): string {
+export function presetLabel(printer: PrinterId): string {
   const p = PRINTERS.find((x) => x.id === printer);
-  return `${p ? p.label : printer} · Stage ${stage}`;
+  return p ? p.label : printer;
 }

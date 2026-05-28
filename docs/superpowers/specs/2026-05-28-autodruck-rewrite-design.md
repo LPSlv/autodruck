@@ -78,7 +78,6 @@ One reducer in `src/state.ts`:
 
 ```ts
 type PrinterId = 'a1'|'a1mini'|'p1s'|'p1p'|'p2s'|'x1c'|'h2s'|'h2d'|'h2c';
-type Stage = 1 | 2;
 type Step = 'hardware' | 'files' | 'tune' | 'review';
 
 type Job = {
@@ -96,7 +95,6 @@ type Job = {
 type State = {
   step: Step;
   printer: PrinterId;
-  stage: Stage;
   jobs: Job[];
   globalDefaults: TuningParams;
   customTemplates: { pre?: string; post?: string } | null;
@@ -106,16 +104,16 @@ type State = {
 ```
 
 Reducer rules:
-- `setPrinter` / `setStage` re-resolve `globalDefaults` from `presetFor(printer, stage).defaults`. Per-job `overrides` preserved.
+- `setPrinter` re-resolves `globalDefaults` from `presetFor(printer).defaults`. Per-job `overrides` preserved.
 - `addJobs` parses each file (`detectPrinter`, `parseHeaderMetrics`, `isAlreadyProcessed`). Failures populate `job.error`; no silent drops.
 - `hydrate` runs once on mount; persists everything except `jobs`.
-- `useEffect` debounces (300ms) and writes `(printer, stage, globalDefaults, customTemplates, cost)` to localStorage.
+- `useEffect` debounces (300ms) and writes `(printer, globalDefaults, customTemplates, cost)` to localStorage.
 
 ## Wizard flow
 
 **Shell** — Top: app name + 4-dot progress + step title. `⋯` opens `AdvancedSheet`. Bottom: sticky `Back` / `Next` (or `Download merged ↵` on Step 4).
 
-**Step 1 Hardware** — Two cards: printer (3-col grid of 9 selectable cards with build volume) and stage (Stage 1 manual ramp / Stage 2 powered actuator). No auto-advance.
+**Step 1 Hardware** — Single card: printer (3-col grid of 9 selectable cards with build volume). No stage. No auto-advance.
 
 **Step 2 Files** — Drop zone (`.gcode` only). Job list below. Each job: filename, detected-printer badge (yellow if mismatch), parsed time/filament, remove button. Red banner for parse errors, yellow chip for already-processed.
 
@@ -140,7 +138,7 @@ Reducer rules:
 
 ## Filenames
 
-- Merged: `autodruck_<printer>_s<stage>_<N>jobs_<md5short>.gcode` (`md5short` = first 8 hex chars of md5 over the merged output)
+- Merged: `autodruck_<printer>_<N>jobs_<md5short>.gcode` (`md5short` = first 8 hex chars of md5 over the merged output)
 - Per-job: `<original_basename>__autodruck.gcode`
 
 ## Testing
@@ -191,3 +189,7 @@ No `Claude` / AI references in commit messages. Plain dev-style conventional-com
 - `test: add A1 stage-1 fixture coverage`
 - `fix(merge): strip leading limits between concatenated jobs`
 - `chore: GPL-3.0 license`
+
+## Changelog
+
+- 2026-05-28: removed Stage 2 — single detach routine per printer.

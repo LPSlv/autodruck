@@ -4,14 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { presetFor, type Stage, type CostSettings } from '@/lib/presets';
+import { presetFor, type CostSettings } from '@/lib/presets';
 import type { TuningParams, PrinterId } from '@/lib/gcode';
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   printer: PrinterId;
-  stage: Stage;
   globalDefaults: TuningParams;
   customTemplates: { pre?: string; post?: string } | null;
   cost: CostSettings;
@@ -47,7 +46,7 @@ const COST_FIELDS: Array<{ key: keyof CostSettings; label: string; unit?: string
 ];
 
 export function AdvancedSheet(p: Props) {
-  const preset = presetFor(p.printer, p.stage);
+  const preset = presetFor(p.printer);
   return (
     <Sheet open={p.open} onOpenChange={p.onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">

@@ -1,4 +1,4 @@
-import { presetFor, type Stage, type CostSettings, DEFAULT_COST } from './lib/presets';
+import { presetFor, type CostSettings, DEFAULT_COST } from './lib/presets';
 import { detectPrinter, isAlreadyProcessed, parseHeaderMetrics,
          type PrinterId, type HeaderMetrics, type TuningParams } from './lib/gcode';
 
@@ -19,7 +19,6 @@ export type Job = {
 export type State = {
   step: Step;
   printer: PrinterId;
-  stage: Stage;
   jobs: Job[];
   globalDefaults: TuningParams;
   customTemplates: { pre?: string; post?: string } | null;
@@ -30,7 +29,6 @@ export type State = {
 export type Action =
   | { type: 'goto'; step: Step }
   | { type: 'setPrinter'; printer: PrinterId }
-  | { type: 'setStage'; stage: Stage }
   | { type: 'addJobs'; files: { name: string; text: string }[] }
   | { type: 'removeJob'; id: string }
   | { type: 'setJobRepeats'; id: string; repeats: number }
@@ -42,15 +40,13 @@ export type Action =
   | { type: 'hydrate'; partial: Partial<State> };
 
 const DEFAULT_PRINTER: PrinterId = 'a1';
-const DEFAULT_STAGE: Stage = 1;
 
 export function initialState(): State {
   return {
     step: 'hardware',
     printer: DEFAULT_PRINTER,
-    stage: DEFAULT_STAGE,
     jobs: [],
-    globalDefaults: presetFor(DEFAULT_PRINTER, DEFAULT_STAGE).defaults,
+    globalDefaults: presetFor(DEFAULT_PRINTER).defaults,
     customTemplates: null,
     cost: { ...DEFAULT_COST },
     advancedOpen: false
@@ -97,13 +93,7 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         printer: action.printer,
-        globalDefaults: presetFor(action.printer, state.stage).defaults
-      };
-    case 'setStage':
-      return {
-        ...state,
-        stage: action.stage,
-        globalDefaults: presetFor(state.printer, action.stage).defaults
+        globalDefaults: presetFor(action.printer).defaults
       };
     case 'addJobs':
       return { ...state, jobs: [...state.jobs, ...action.files.map((f) => parseFile(f.name, f.text))] };

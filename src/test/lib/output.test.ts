@@ -28,7 +28,6 @@ const P1S_GCODE = fx('p1s_stage2.gcode');
 
 const BASE_OPTS = {
   printer: 'a1' as const,
-  stage: 1 as const,
   globalDefaults: {
     cooldownTarget: 25,
     cooldownOvershoot: 5,
@@ -88,9 +87,9 @@ describe('buildMerged', () => {
 });
 
 describe('mergedFilename', () => {
-  it('returns the spec pattern autodruck_<printer>_s<stage>_<N>jobs_<8hex>.gcode', () => {
+  it('returns the spec pattern autodruck_<printer>_<N>jobs_<8hex>.gcode', () => {
     const body = 'some gcode content';
-    const name = mergedFilename('a1', 1, 2, body);
-    expect(name).toMatch(/^autodruck_a1_s1_2jobs_[0-9a-f]{8}\.gcode$/);
+    const name = mergedFilename('a1', 2, body);
+    expect(name).toMatch(/^autodruck_a1_2jobs_[0-9a-f]{8}\.gcode$/);
   });
 });

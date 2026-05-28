@@ -1,6 +1,6 @@
 import { PRINTERS } from './presets';
 import type { PrinterId, TuningParams } from './gcode';
-import type { Stage, CostSettings } from './presets';
+import type { CostSettings } from './presets';
 
 const KEY = 'autodruck:v1';
 
@@ -8,7 +8,6 @@ const PRINTER_IDS = new Set(PRINTERS.map((p) => p.id));
 
 export type Persisted = {
   printer?: PrinterId;
-  stage?: Stage;
   globalDefaults?: TuningParams;
   customTemplates?: { pre?: string; post?: string } | null;
   cost?: CostSettings;
@@ -23,7 +22,6 @@ export function loadPersisted(): Persisted {
     if (typeof parsed.printer === 'string' && PRINTER_IDS.has(parsed.printer as PrinterId)) {
       out.printer = parsed.printer as PrinterId;
     }
-    if (parsed.stage === 1 || parsed.stage === 2) out.stage = parsed.stage;
     if (parsed.globalDefaults && typeof parsed.globalDefaults === 'object') {
       out.globalDefaults = parsed.globalDefaults as TuningParams;
     }

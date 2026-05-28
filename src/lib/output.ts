@@ -1,5 +1,5 @@
 import { downloadZip } from 'client-zip';
-import { presetFor, type Stage } from './presets';
+import { presetFor } from './presets';
 import {
   buildMergedHeader,
   extractExecutableBody,
@@ -15,13 +15,12 @@ import type { Job } from '@/state';
 
 type BuildOpts = {
   printer: PrinterId;
-  stage: Stage;
   globalDefaults: TuningParams;
   customTemplates: { pre?: string; post?: string } | null;
 };
 
 export function buildSingle(job: Job, opts: BuildOpts): string {
-  const preset = presetFor(opts.printer, opts.stage);
+  const preset = presetFor(opts.printer);
   const params: TuningParams = { ...opts.globalDefaults, ...job.overrides };
   const pre = substitute(opts.customTemplates?.pre ?? preset.pre, params);
   const post = substitute(opts.customTemplates?.post ?? preset.post, params);
@@ -62,8 +61,8 @@ export function downloadBlob(name: string, text: string) {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-export function mergedFilename(printer: PrinterId, stage: Stage, n: number, body: string) {
-  return `autodruck_${printer}_s${stage}_${n}jobs_${md5(body).slice(0, 8)}.gcode`;
+export function mergedFilename(printer: PrinterId, n: number, body: string) {
+  return `autodruck_${printer}_${n}jobs_${md5(body).slice(0, 8)}.gcode`;
 }
 
 export async function downloadEach(jobs: Job[], opts: BuildOpts) {

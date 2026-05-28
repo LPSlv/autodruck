@@ -1,6 +1,6 @@
 # autodruck — open-source 3D printer farm automation
 
-Browser-based G-code post-processor for unattended back-to-back printing on Bambu Lab printers. Take any sliced `.gcode` from Bambu Studio or OrcaSlicer, inject a plate-detach and cleaning routine, and loop your prints overnight. Compatible with [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) stage-1 mechanical detach hardware and 3D-printable parts.
+Browser-based G-code post-processor for unattended back-to-back printing on Bambu Lab printers. Take any sliced `.gcode` from Bambu Studio or OrcaSlicer, inject a plate-detach and cleaning routine, and loop your prints overnight. Compatible with [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) mechanical detach hardware and 3D-printable parts.
 
 **No accounts. No cloud. No telemetry.** Everything runs in your browser.
 
@@ -10,7 +10,7 @@ Bambu Lab **A1**, **A1 mini**, **P1S**, **P1P**, **P2S**, **X1 Carbon**, **H2S**
 
 ## What it does
 
-- **Plate detachment gcode injection** — adds a cooldown + head-sweep (Stage 1) or powered actuator (Stage 2) routine to the end of your sliced file.
+- **Plate detachment gcode injection** — adds a cooldown + head-sweep routine to the end of your sliced file.
 - **Print looping / job queuing** — concatenate multiple sliced files (or repeats of the same file) into one continuous farm-print gcode.
 - **Per-printer presets** — tuned geometry, sweep speeds, cooldown targets for each Bambu model out of the box.
 - **Cost model** — filament, electricity, labor, depreciation, and failure-rate adjusted total cost per job.
@@ -22,27 +22,25 @@ Bambu Lab **A1**, **A1 mini**, **P1S**, **P1P**, **P2S**, **X1 Carbon**, **H2S**
 Bambu Studio / OrcaSlicer
     │
     ▼   .gcode
-┌────────────┐     pick printer + stage
+┌────────────┐     pick printer
 │ autodruck  │ ─── drop files ───────────►  inject + (optionally) merge
 └────────────┘
     │
-    ▼   <printer>_s<stage>_<N>jobs.gcode
+    ▼   autodruck_<printer>_<N>jobs.gcode
         send to printer via SD / LAN
 ```
 
 ## Quickstart (use the live tool)
 
 1. Clone and run locally (see Build), or self-host the build artifact.
-2. Pick your printer and the Farmloop hardware stage you have installed.
+2. Pick your Bambu printer.
 3. Drop one or more sliced `.gcode` files. Each one keeps its own loop count.
 4. Tune temps, sweep geometry, and loop counts if needed.
 5. Download the merged farm-print `.gcode`, drop it onto the SD card, run it.
 
 ## Hardware
 
-Designed to drive [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) stage-1 hardware — a passive ramp + 3D-printed plate-clip parts that turn a single Bambu printer into an unattended farm node. Stage-2 support is for powered actuator setups (servo / solenoid kick).
-
-The Farmloop project lists supported hardware and prints the parts you need. autodruck is the software side: it just emits the right gcode to drive that hardware.
+Designed to drive [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) hardware — a passive ramp + 3D-printed plate-clip parts that turn a single Bambu printer into an unattended farm node. autodruck emits the gcode to drive that hardware.
 
 ## Privacy
 
