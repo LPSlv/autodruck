@@ -21,17 +21,12 @@ export default function App() {
   useEffect(() => {
     const p = loadPersisted();
     dispatch({ type: 'hydrate', partial: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      printer: (p.printer as any) ?? state.printer,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      stage: (p.stage as any) ?? state.stage,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      globalDefaults: (p.globalDefaults as any) ?? state.globalDefaults,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      customTemplates: (p.customTemplates as any) ?? state.customTemplates,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cost: (p.cost as any) ?? state.cost
-    }});
+      printer: p.printer ?? state.printer,
+      stage: p.stage ?? state.stage,
+      globalDefaults: p.globalDefaults ?? state.globalDefaults,
+      customTemplates: p.customTemplates ?? state.customTemplates,
+      cost: p.cost ?? state.cost
+    } });
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
