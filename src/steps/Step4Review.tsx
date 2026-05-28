@@ -46,12 +46,37 @@ export function Step4Review({ jobs, cost, mismatchedCount }: Props) {
       <Card className="p-2">
         <Table>
           <TableBody>
-            <TableRow><TableCell>Filament</TableCell><TableCell className="text-right">€ {totals.filament.toFixed(2)}</TableCell></TableRow>
-            <TableRow><TableCell>Electricity</TableCell><TableCell className="text-right">€ {totals.electricity.toFixed(2)}</TableCell></TableRow>
-            <TableRow><TableCell>Labor</TableCell><TableCell className="text-right">€ {totals.labor.toFixed(2)}</TableCell></TableRow>
-            <TableRow><TableCell>Depreciation</TableCell><TableCell className="text-right">€ {totals.depreciation.toFixed(2)}</TableCell></TableRow>
-            <TableRow><TableCell>Failure adjustment</TableCell><TableCell className="text-right">€ {totals.failureAdjustment.toFixed(2)}</TableCell></TableRow>
-            <TableRow><TableCell className="font-medium">Total</TableCell><TableCell className="text-right font-medium">€ {totals.total.toFixed(2)}</TableCell></TableRow>
+            {([
+              ['Filament',           totals.filament],
+              ['Electricity',        totals.electricity],
+              ['Labor',              totals.labor],
+              ['Depreciation',       totals.depreciation],
+              ['Failure adjustment', totals.failureAdjustment]
+            ] as Array<[string, number]>)
+              .sort((a, b) => b[1] - a[1])
+              .map(([label, value]) => {
+                const share = totals.total > 0 ? value / totals.total : 0;
+                return (
+                  <TableRow key={label}>
+                    <TableCell className="w-40">{label}</TableCell>
+                    <TableCell>
+                      <div className="h-1.5 bg-muted rounded-sm overflow-hidden">
+                        <div
+                          className="h-full bg-foreground"
+                          style={{ width: `${share * 100}%` }}
+                          aria-label={`${(share * 100).toFixed(0)}% of total`}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums w-24">€ {value.toFixed(2)}</TableCell>
+                  </TableRow>
+                );
+              })}
+            <TableRow>
+              <TableCell className="font-medium">Total</TableCell>
+              <TableCell />
+              <TableCell className="text-right font-medium tabular-nums">€ {totals.total.toFixed(2)}</TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </Card>
