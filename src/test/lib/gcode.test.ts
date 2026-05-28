@@ -27,6 +27,20 @@ describe('detectPrinter', () => {
   it('returns null for headerless', () => {
     expect(detectPrinter(fx('headerless.gcode'))).toBeNull();
   });
+  it('detects nothing on truly empty input', () => {
+    expect(detectPrinter('')).toBeNull();
+  });
+
+  it.each([
+    ['; ========== machine: A1 mini ==========', 'a1mini'],
+    ['; ========== machine: P2S ==========', 'p2s'],
+    ['; ========== machine: X1C ==========', 'x1c'],
+    ['; ========== machine: P1P ==========', 'p1s'], // P1P maps to p1s in detector
+    ['; printer_model_id = C13', 'p2s'],
+    ['; printer_model_id = C11', 'x1c'],
+  ])('detects %s as %s', (header, expected) => {
+    expect(detectPrinter(header)).toBe(expected);
+  });
 });
 
 describe('isAlreadyProcessed', () => {
