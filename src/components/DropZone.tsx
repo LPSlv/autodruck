@@ -1,5 +1,8 @@
 import { useRef, useState, type DragEvent } from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+const LARGE_FILE_THRESHOLD = 5 * 1024 * 1024; // 5 MB
 
 type Props = {
   onFiles: (files: { name: string; text: string }[]) => void;
@@ -10,8 +13,37 @@ export function DropZone({ onFiles }: Props) {
   const [over, setOver] = useState(false);
 
   async function readAll(list: FileList | File[]) {
-    const arr = Array.from(list).filter((f) => f.name.toLowerCase().endsWith('.gcode'));
-    const out = await Promise.all(arr.map(async (f) => ({ name: f.name, text: await f.text() })));
+    const arr = Array.from(list);
+    const gcodeFiles: File[] = [];
+    let has3mf = false;
+    let hasOther = false;
+
+    for (const f of arr) {
+      const lower = f.name.toLowerCase();
+      if (lower.endsWith('.gcode')) {
+        gcodeFiles.push(f);
+      } else if (lower.endsWith('.3mf')) {
+        has3mf = true;
+      } else {
+        hasOther = true;
+      }
+    }
+
+    if (has3mf) {
+      toast.error('.3mf import lands in v2 — please slice to .gcode in Bambu Studio');
+    }
+    if (hasOther) {
+      toast.error('Only .gcode files accepted');
+    }
+
+    if (gcodeFiles.length === 0) return;
+
+    const hasLarge = gcodeFiles.some((f) => f.size > LARGE_FILE_THRESHOLD);
+    if (hasLarge) {
+      toast.info('Parsing large file — UI may stutter briefly');
+    }
+
+    const out = await Promise.all(gcodeFiles.map(async (f) => ({ name: f.name, text: await f.text() })));
     if (out.length) onFiles(out);
   }
 
