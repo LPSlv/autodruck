@@ -16,13 +16,15 @@ type Props = {
   canNext: boolean;
   onBack: () => void;
   onNext: () => void;
+  onJumpStep: (s: Step) => void;
+  stepValidity: Record<Step, boolean>;
   primaryAction?: { label: string; onClick: () => void; disabled?: boolean };
   ghostAction?: { label: string; onClick: () => void; disabled?: boolean };
   advancedTrigger: React.ReactNode;
   children: React.ReactNode;
 };
 
-export function WizardShell({ step, canBack, canNext, onBack, onNext, primaryAction, ghostAction, advancedTrigger, children }: Props) {
+export function WizardShell({ step, canBack, canNext, onBack, onNext, onJumpStep, stepValidity, primaryAction, ghostAction, advancedTrigger, children }: Props) {
   const idx = STEPS.findIndex((s) => s.id === step);
   return (
     <div className="min-h-screen flex flex-col">
@@ -33,12 +35,27 @@ export function WizardShell({ step, canBack, canNext, onBack, onNext, primaryAct
           <span className="text-sm text-muted-foreground">{STEPS[idx]?.title}</span>
           <div className="flex-1" />
           <ol className="flex gap-1.5" aria-label="progress">
-            {STEPS.map((s, i) => (
-              <li key={s.id}
-                  className={cn('h-2 w-2 rounded-full',
-                    i <= idx ? 'bg-primary' : 'bg-muted')}
-                  aria-current={i === idx ? 'step' : undefined} />
-            ))}
+            {STEPS.map((s, i) => {
+              const reachable = stepValidity[s.id];
+              return (
+                <li key={s.id}>
+                  <button
+                    onClick={() => reachable && onJumpStep(s.id)}
+                    disabled={!reachable}
+                    title={`${s.title} (${i + 1})`}
+                    aria-label={`Go to ${s.title}`}
+                    aria-current={i === idx ? 'step' : undefined}
+                    className={cn(
+                      'h-2 w-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      i <= idx ? 'bg-primary' : 'bg-muted',
+                      reachable
+                        ? 'cursor-pointer hover:ring-2 hover:ring-primary/50'
+                        : 'cursor-not-allowed opacity-40'
+                    )}
+                  />
+                </li>
+              );
+            })}
           </ol>
           {advancedTrigger}
         </div>

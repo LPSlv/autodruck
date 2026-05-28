@@ -52,8 +52,16 @@ export default function App() {
     (j) => j.detectedPrinter && j.detectedPrinter !== state.printer && !j.error
   ).length;
 
+  const stepValidity: Record<Step, boolean> = {
+    hardware: true,
+    files: true,
+    tune: validJobs.length > 0,
+    review: validJobs.length > 0
+  };
+
   function handleNext() { if (stepIdx < STEP_ORDER.length - 1) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx + 1] }); }
   function handleBack() { if (stepIdx > 0) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx - 1] }); }
+  function handleJumpStep(s: Step) { dispatch({ type: 'goto', step: s }); }
 
   function handleMerge() {
     try {
@@ -78,6 +86,8 @@ export default function App() {
         canNext={canNext}
         onBack={handleBack}
         onNext={handleNext}
+        onJumpStep={handleJumpStep}
+        stepValidity={stepValidity}
         primaryAction={state.step === 'review'
           ? { label: `Download merged ↵`, onClick: handleMerge, disabled: mismatched > 0 || validJobs.length === 0 }
           : undefined}
