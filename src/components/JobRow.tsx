@@ -19,9 +19,14 @@ export function JobRow({ job, selectedPrinter, onRemove }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium truncate">{job.fileName}</span>
-            {job.detectedPrinter && (
-              <Badge variant={mismatched ? 'destructive' : 'secondary'}>
+            {job.detectedPrinter && !mismatched && (
+              <Badge variant="secondary">
                 {job.detectedPrinter}
+              </Badge>
+            )}
+            {job.detectedPrinter && mismatched && (
+              <Badge variant="outline" className="border-yellow-500 text-yellow-700">
+                {job.detectedPrinter} (mismatch)
               </Badge>
             )}
             {job.alreadyProcessed && (
