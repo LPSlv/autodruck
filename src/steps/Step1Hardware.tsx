@@ -19,6 +19,7 @@ export function Step1Hardware({ printer, stage, onPrinter, onStage }: Props) {
           {PRINTERS.map((p) => (
             <button
               key={p.id}
+              aria-label={p.label}
               onClick={() => onPrinter(p.id)}
               className={cn(
                 'text-left p-4 rounded-md border transition-colors',
