@@ -24,3 +24,11 @@ Thumbs.db
 .cache/
 dist/
 build/
+
+# Vite + TypeScript toolchain
+.vite
+*.tsbuildinfo
+playwright-report
+test-results
+.env*
+pnpm-lock.yaml
