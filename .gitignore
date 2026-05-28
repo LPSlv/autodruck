@@ -31,6 +31,6 @@ build/
 playwright-report
 test-results
 .env*
-pnpm-lock.yaml
+package-lock.json
 vite_tmp/
 tmp/
