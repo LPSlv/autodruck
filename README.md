@@ -1,4 +1,4 @@
-# autodruck — open-source 3D printer farm automation
+# autodruck: open-source 3D printer farm automation
 
 Browser-based G-code post-processor for unattended back-to-back printing on Bambu Lab printers. Take any sliced `.gcode` from Bambu Studio or OrcaSlicer, inject a plate-detach and cleaning routine, and loop your prints overnight. Compatible with [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) mechanical detach hardware and 3D-printable parts.
 
@@ -10,11 +10,10 @@ Bambu Lab **A1**, **A1 mini**, **P1S**, **P1P**, **P2S**, **X1 Carbon**, **H2S**
 
 ## What it does
 
-- **Plate detachment gcode injection** — adds a cooldown + head-sweep routine to the end of your sliced file.
-- **Print looping / job queuing** — concatenate multiple sliced files (or repeats of the same file) into one continuous farm-print gcode.
-- **Per-printer presets** — tuned geometry, sweep speeds, cooldown targets for each Bambu model out of the box.
-- **Cost model** — filament, electricity, labor, depreciation, and failure-rate adjusted total cost per job.
-- **Tufte-style charts** — minimal sparklines for time / filament / cost across queued jobs.
+- **Plate detachment gcode injection**: adds a cooldown and head-sweep routine to the end of your sliced file.
+- **Print looping and job queuing**: concatenate multiple sliced files (or repeats of the same file) into one continuous farm-print gcode.
+- **Per-printer presets**: tuned geometry, sweep speeds, and cooldown targets for each Bambu model out of the box.
+- **Cost model**: filament, electricity, labor, depreciation, and failure-rate adjusted total cost per job.
 
 ## How it works
 
@@ -40,7 +39,7 @@ Bambu Studio / OrcaSlicer
 
 ## Hardware
 
-Designed to drive [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) hardware — a passive ramp + 3D-printed plate-clip parts that turn a single Bambu printer into an unattended farm node. autodruck emits the gcode to drive that hardware.
+Designed to drive [Farmloop](https://github.com/Maxime-Belleville/FarmLoop) hardware: a passive ramp plus 3D-printed plate-clip parts that turn a single Bambu printer into an unattended farm node. autodruck emits the gcode to drive that hardware.
 
 ## Privacy
 
@@ -55,13 +54,13 @@ pnpm build        # → dist/
 pnpm preview      # serve dist/ for a final check
 ```
 
-Self-host the `dist/` folder anywhere — GitHub Pages, Cloudflare Pages, a USB stick, your own server. It's fully static.
+Self-host the `dist/` folder anywhere: GitHub Pages, Cloudflare Pages, a USB stick, your own server. It's fully static.
 
 ## Tests
 
 ```bash
-pnpm test         # vitest — gcode parse / inject / merge / cost
-pnpm e2e          # playwright — full wizard smoke
+pnpm test         # vitest: gcode parse, inject, merge, cost
+pnpm e2e          # playwright: full wizard smoke
 ```
 
 ## License
