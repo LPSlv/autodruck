@@ -112,6 +112,7 @@ export default function App() {
             printer={state.printer} stage={state.stage}
             jobs={state.jobs} globalDefaults={state.globalDefaults}
             onJobRepeats={(id, n) => dispatch({ type: 'setJobRepeats', id, repeats: n })}
+            onJobOverride={(id, patch) => dispatch({ type: 'setJobOverride', id, patch })}
             onOpenAdvanced={() => dispatch({ type: 'toggleAdvanced', open: true })}
           />
         )}

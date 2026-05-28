@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { presetLabel } from '@/lib/presets';
 import type { Job } from '@/state';
@@ -14,10 +15,24 @@ type Props = {
   jobs: Job[];
   globalDefaults: TuningParams;
   onJobRepeats: (id: string, n: number) => void;
+  onJobOverride: (id: string, patch: Partial<TuningParams>) => void;
   onOpenAdvanced: () => void;
 };
 
-export function Step3Tune({ printer, stage, jobs, globalDefaults, onJobRepeats, onOpenAdvanced }: Props) {
+type OverrideField = { key: keyof TuningParams; label: string };
+
+const OVERRIDE_FIELDS: OverrideField[] = [
+  { key: 'cooldownTarget', label: 'Cooldown °C' },
+  { key: 'dwell',          label: 'Dwell s' },
+  { key: 'zlift',          label: 'Z lift mm' },
+  { key: 'repeats',        label: 'Repeats' },
+  { key: 'pushx',          label: 'Push X' },
+  { key: 'returnx',        label: 'Return X' },
+  { key: 'parky',          label: 'Park Y' },
+  { key: 'parkz',          label: 'Park Z' },
+];
+
+export function Step3Tune({ printer, stage, jobs, globalDefaults, onJobRepeats, onJobOverride, onOpenAdvanced }: Props) {
   return (
     <div className="space-y-6">
       <Card className="p-4">
@@ -54,8 +69,29 @@ export function Step3Tune({ printer, stage, jobs, globalDefaults, onJobRepeats, 
                   </Button>
                 </CollapsibleTrigger>
               </div>
-              <CollapsibleContent className="mt-3 text-sm text-muted-foreground">
-                Per-job overrides land in v2 — use the global advanced sheet for now.
+              <CollapsibleContent className="mt-3">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {OVERRIDE_FIELDS.map(({ key, label }) => (
+                    <div key={key} className="space-y-1">
+                      <Label className="text-xs">{label}</Label>
+                      <Input
+                        type="number"
+                        placeholder={String(globalDefaults[key])}
+                        value={job.overrides[key] ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '') {
+                            const patch = { ...job.overrides };
+                            delete patch[key];
+                            onJobOverride(job.id, patch as Partial<TuningParams>);
+                          } else {
+                            onJobOverride(job.id, { [key]: Number(val) } as Partial<TuningParams>);
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
               </CollapsibleContent>
             </Card>
           </Collapsible>
