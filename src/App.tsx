@@ -1,22 +1,25 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { WizardShell, AdvancedTrigger } from '@/components/WizardShell';
 import { Step1Hardware } from '@/steps/Step1Hardware';
 import { Step2Files } from '@/steps/Step2Files';
 import { Step3Tune } from '@/steps/Step3Tune';
 import { Step4Review } from '@/steps/Step4Review';
 import { AdvancedSheet } from '@/components/AdvancedSheet';
+import { CommandPalette } from '@/components/CommandPalette';
 import { Toaster, toast } from 'sonner';
 import { reducer, initialState, type Step } from '@/state';
 import { loadPersisted, savePersisted } from '@/lib/store';
 import {
   buildMerged, downloadBlob, downloadEach, mergedFilename
 } from '@/lib/output';
+import { useHotkeys } from '@/lib/hotkeys';
 
 const STEP_ORDER: Step[] = ['hardware', 'files', 'tune', 'review'];
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
     const p = loadPersisted();
@@ -51,6 +54,8 @@ export default function App() {
   const mismatched = state.jobs.filter(
     (j) => j.detectedPrinter && j.detectedPrinter !== state.printer && !j.error
   ).length;
+  const canMerge = mismatched === 0 && validJobs.length > 0;
+  const canDownloadEach = validJobs.length > 0;
 
   const stepValidity: Record<Step, boolean> = {
     hardware: true,
@@ -59,11 +64,17 @@ export default function App() {
     review: validJobs.length > 0
   };
 
-  function handleNext() { if (stepIdx < STEP_ORDER.length - 1) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx + 1] }); }
-  function handleBack() { if (stepIdx > 0) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx - 1] }); }
+  const handleNext = useCallback(() => {
+    if (stepIdx < STEP_ORDER.length - 1) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx + 1] });
+  }, [stepIdx]);
+
+  const handleBack = useCallback(() => {
+    if (stepIdx > 0) dispatch({ type: 'goto', step: STEP_ORDER[stepIdx - 1] });
+  }, [stepIdx]);
+
   function handleJumpStep(s: Step) { dispatch({ type: 'goto', step: s }); }
 
-  function handleMerge() {
+  const handleMerge = useCallback(() => {
     try {
       const merged = buildMerged(validJobs, state);
       const name = mergedFilename(state.printer, validJobs.length, merged);
@@ -71,12 +82,60 @@ export default function App() {
     } catch (e) {
       toast.error((e as Error).message);
     }
-  }
+  }, [validJobs, state]);
 
-  async function handleEach() {
+  const handleEach = useCallback(async () => {
     try { await downloadEach(validJobs, state); }
     catch (e) { toast.error((e as Error).message); }
-  }
+  }, [validJobs, state]);
+
+  const openAdvanced = useCallback(() => {
+    dispatch({ type: 'toggleAdvanced', open: true });
+  }, []);
+
+  useHotkeys([
+    {
+      key: 'ArrowLeft',
+      preventInInput: true,
+      handler: () => { if (canBack) handleBack(); }
+    },
+    {
+      key: 'ArrowRight',
+      preventInInput: true,
+      handler: () => { if (canNext) handleNext(); }
+    },
+    {
+      key: 'Enter',
+      preventInInput: true,
+      handler: () => {
+        if (state.step !== 'review' && canNext) handleNext();
+        else if (state.step === 'review' && canMerge) handleMerge();
+      }
+    },
+    {
+      key: 'o',
+      cmd: true,
+      handler: () => {
+        if (state.step !== 'files') {
+          dispatch({ type: 'goto', step: 'files' });
+        } else {
+          document.querySelector<HTMLInputElement>('input[type=file]')?.click();
+        }
+      }
+    },
+    {
+      key: 'k',
+      cmd: true,
+      handler: () => setPaletteOpen((v) => !v)
+    },
+    {
+      key: '?',
+      preventInInput: true,
+      handler: () => {
+        document.dispatchEvent(new CustomEvent('autodruck:toggle-hints'));
+      }
+    }
+  ]);
 
   return (
     <>
@@ -89,12 +148,12 @@ export default function App() {
         onJumpStep={handleJumpStep}
         stepValidity={stepValidity}
         primaryAction={state.step === 'review'
-          ? { label: `Download merged ↵`, onClick: handleMerge, disabled: mismatched > 0 || validJobs.length === 0 }
+          ? { label: `Download merged ↵`, onClick: handleMerge, disabled: !canMerge }
           : undefined}
         ghostAction={state.step === 'review'
-          ? { label: 'Download each', onClick: () => void handleEach(), disabled: validJobs.length === 0 }
+          ? { label: 'Download each', onClick: () => void handleEach(), disabled: !canDownloadEach }
           : undefined}
-        advancedTrigger={<AdvancedTrigger onClick={() => dispatch({ type: 'toggleAdvanced', open: true })} />}
+        advancedTrigger={<AdvancedTrigger onClick={openAdvanced} />}
       >
         {state.step === 'hardware' && (
           <Step1Hardware
@@ -115,7 +174,7 @@ export default function App() {
             jobs={state.jobs} globalDefaults={state.globalDefaults}
             onJobRepeats={(id, n) => dispatch({ type: 'setJobRepeats', id, repeats: n })}
             onJobOverride={(id, patch) => dispatch({ type: 'setJobOverride', id, patch })}
-            onOpenAdvanced={() => dispatch({ type: 'toggleAdvanced', open: true })}
+            onOpenAdvanced={openAdvanced}
           />
         )}
         {state.step === 'review' && (
@@ -133,6 +192,20 @@ export default function App() {
         onTuningPatch={(patch) => dispatch({ type: 'setGlobalDefault', patch })}
         onTemplatesPatch={(templates) => dispatch({ type: 'setCustomTemplates', templates })}
         onCostPatch={(patch) => dispatch({ type: 'setCost', patch })}
+      />
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        currentPrinter={state.printer}
+        stepValidity={stepValidity}
+        canMerge={canMerge}
+        canDownloadEach={canDownloadEach}
+        onJump={handleJumpStep}
+        onPickPrinter={(p) => dispatch({ type: 'setPrinter', printer: p })}
+        onOpenAdvanced={openAdvanced}
+        onMerge={handleMerge}
+        onDownloadEach={() => void handleEach()}
       />
 
       <Toaster richColors position="bottom-right" />
